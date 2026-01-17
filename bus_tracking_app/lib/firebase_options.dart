@@ -1,4 +1,5 @@
-import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 
 class DefaultFirebaseOptions {
   static const FirebaseOptions web = FirebaseOptions(
@@ -7,7 +8,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '481080557436',
     projectId: 'bus-tracking-mobile-app-cfaa2',
     authDomain: 'bus-tracking-mobile-app-cfaa2.firebaseapp.com',
-    storageBucket: 'bus-tracking-mobile-app-cfaa2.firebasestorage.app',
+    storageBucket: 'https://bus-tracking-mobile-app-cfaa2-default-rtdb.firebaseio.com/',
     measurementId: 'G-R986QN0LXN',
   );
 
@@ -29,7 +30,18 @@ class DefaultFirebaseOptions {
   );
 
   static FirebaseOptions get currentPlatform {
-    // This will be set by platform-specific implementations
-    throw UnsupportedError('DefaultFirebaseOptions.currentPlatform is not implemented');
+    if (kIsWeb) {
+      return web;
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return android;
+      case TargetPlatform.iOS:
+        return ios;
+      default:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions are not supported for this platform.',
+        );
+    }
   }
 }
