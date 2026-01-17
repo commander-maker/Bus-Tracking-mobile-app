@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:bus_tracking_app/features/auth/auth_controller.dart';
 import 'package:bus_tracking_app/models/route.dart' as app_route;
 
-class RouteSelectionScreen extends StatefulWidget {
-  const RouteSelectionScreen({super.key});
+class AdminRouteSelectionScreen extends StatefulWidget {
+  const AdminRouteSelectionScreen({super.key});
 
   @override
-  State<RouteSelectionScreen> createState() => _RouteSelectionScreenState();
+  State<AdminRouteSelectionScreen> createState() =>
+      _AdminRouteSelectionScreenState();
 }
 
-class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
+class _AdminRouteSelectionScreenState extends State<AdminRouteSelectionScreen> {
   final _authController = AuthController();
   final _searchController = TextEditingController();
   String _searchQuery = '';
@@ -76,17 +77,39 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
         Navigator.of(context).pushReplacementNamed('/login');
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Logout failed: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Logout failed: $e')));
+      }
     }
   }
 
-  void _selectRoute(app_route.Route route) {
-    // TODO: Navigate to bus tracking screen
+  void _editRoute(app_route.Route route) {
+    // TODO: Navigate to edit route screen
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Selected Route: ${route.routeNumber}'),
+        content: Text('Edit Route: ${route.routeNumber}'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _addNewRoute() {
+    // TODO: Navigate to add route screen
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Add new route functionality coming soon'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _manageRoute(app_route.Route route) {
+    // TODO: Navigate to admin dashboard for this route
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Manage Route: ${route.routeNumber}'),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -99,9 +122,9 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: Colors.orange.shade700,
         title: const Text(
-          'Select Bus Route',
+          'Manage Routes',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         actions: [
@@ -114,11 +137,11 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
       ),
       body: Column(
         children: [
-          // User Info Header
+          // Admin Info Header
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.blue.shade700,
+              color: Colors.orange.shade700,
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(30),
                 bottomRight: Radius.circular(30),
@@ -134,9 +157,9 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
                       radius: 30,
                       backgroundColor: Colors.white,
                       child: Icon(
-                        Icons.person,
+                        Icons.admin_panel_settings,
                         size: 35,
-                        color: Colors.blue.shade700,
+                        color: Colors.orange.shade700,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -145,7 +168,7 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Welcome, ${user?.name ?? 'Passenger'}',
+                            user?.name ?? 'Admin',
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -153,10 +176,11 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
                             ),
                           ),
                           Text(
-                            user?.email ?? '',
+                            user?.busCompanyName ?? 'Bus Company',
                             style: const TextStyle(
                               fontSize: 14,
                               color: Colors.white70,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
@@ -174,7 +198,7 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
                     });
                   },
                   decoration: InputDecoration(
-                    hintText: 'Search routes, locations...',
+                    hintText: 'Search routes...',
                     prefixIcon: const Icon(Icons.search),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
@@ -207,7 +231,7 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.search_off,
+                          Icons.route_outlined,
                           size: 80,
                           color: Colors.grey.shade400,
                         ),
@@ -220,6 +244,14 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Add a new route to get started',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
                       ],
                     ),
                   )
@@ -228,22 +260,28 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
                     itemCount: _filteredRoutes.length,
                     itemBuilder: (context, index) {
                       final route = _filteredRoutes[index];
-                      return _buildRouteCard(route);
+                      return _buildAdminRouteCard(route);
                     },
                   ),
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _addNewRoute,
+        backgroundColor: Colors.orange.shade700,
+        icon: const Icon(Icons.add),
+        label: const Text('Add Route'),
+      ),
     );
   }
 
-  Widget _buildRouteCard(app_route.Route route) {
+  Widget _buildAdminRouteCard(app_route.Route route) {
     return Card(
-      elevation: 2,
+      elevation: 3,
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
-        onTap: () => _selectRoute(route),
+        onTap: () => _manageRoute(route),
         borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -259,7 +297,7 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade700,
+                      color: Colors.orange.shade700,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -272,51 +310,16 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
                     ),
                   ),
                   const Spacer(),
-                  // Distance & Duration
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.route,
-                            size: 16,
-                            color: Colors.grey.shade600,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${route.distance} km',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.access_time,
-                            size: 16,
-                            color: Colors.grey.shade600,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '~${route.estimatedDuration} min',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                  // Edit Button
+                  IconButton(
+                    icon: Icon(Icons.edit, color: Colors.orange.shade700),
+                    onPressed: () => _editRoute(route),
+                    tooltip: 'Edit Route',
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              // Route Path
+              // Route Info
               Row(
                 children: [
                   Expanded(
@@ -328,7 +331,7 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
                             Container(
                               width: 10,
                               height: 10,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 color: Colors.green,
                                 shape: BoxShape.circle,
                               ),
@@ -358,7 +361,7 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
                             Container(
                               width: 10,
                               height: 10,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 color: Colors.red,
                                 shape: BoxShape.circle,
                               ),
@@ -378,10 +381,27 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
                       ],
                     ),
                   ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.grey.shade400,
-                    size: 20,
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Route Stats
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatItem(
+                    Icons.route,
+                    '${route.distance} km',
+                    'Distance',
+                  ),
+                  _buildStatItem(
+                    Icons.access_time,
+                    '${route.estimatedDuration} min',
+                    'Duration',
+                  ),
+                  _buildStatItem(
+                    Icons.location_on,
+                    '${route.stopIds.length}',
+                    'Stops',
                   ),
                 ],
               ),
@@ -389,6 +409,29 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStatItem(IconData icon, String value, String label) {
+    return Column(
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: Colors.grey.shade600),
+            const SizedBox(width: 4),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+        ),
+      ],
     );
   }
 }

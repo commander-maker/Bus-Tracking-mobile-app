@@ -5,22 +5,21 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'firebase_test.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
     await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.web,
+      options: DefaultFirebaseOptions.currentPlatform,
     );
     print('✅ Firebase initialized successfully!');
-    
+
     // Run connection test
     await testFirebaseConnection();
   } catch (e) {
     print('❌ Firebase initialization error: $e');
   }
-  
+
   runApp(const MyApp());
 }
 

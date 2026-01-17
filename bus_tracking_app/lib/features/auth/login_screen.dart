@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bus_tracking_app/features/auth/auth_controller.dart';
 import 'package:bus_tracking_app/features/auth/register_screen.dart';
+import 'package:bus_tracking_app/models/user.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,10 +43,15 @@ class _LoginScreenState extends State<LoginScreen> {
         if (mounted) {
           if (success) {
             // Navigate to home based on user type
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Login successful!')),
-            );
-            // TODO: Navigate to appropriate home screen
+            final user = _authController.currentUser;
+
+            if (user?.userType == UserType.admin) {
+              Navigator.of(
+                context,
+              ).pushReplacementNamed('/admin-route-selection');
+            } else {
+              Navigator.of(context).pushReplacementNamed('/route-selection');
+            }
           } else {
             setState(() {
               _errorMessage = 'Invalid email or password';
@@ -78,10 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Colors.blue.shade700,
-                Colors.blue.shade400,
-              ],
+              colors: [Colors.blue.shade700, Colors.blue.shade400],
             ),
           ),
           child: Column(
@@ -124,10 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 8),
                     const Text(
                       'Real-time Bus Tracking',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white70,
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.white70),
                     ),
                   ],
                 ),
@@ -161,10 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const Text(
                             'Sign in to your account',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
                           ),
                           const SizedBox(height: 24),
                           // Error Message
@@ -178,8 +175,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               child: Row(
                                 children: [
-                                  Icon(Icons.error_outline,
-                                      color: Colors.red.shade700, size: 20),
+                                  Icon(
+                                    Icons.error_outline,
+                                    color: Colors.red.shade700,
+                                    size: 20,
+                                  ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Text(
@@ -285,8 +285,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 // TODO: Navigate to forgot password
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content:
-                                        Text('Forgot password feature coming soon'),
+                                    content: Text(
+                                      'Forgot password feature coming soon',
+                                    ),
                                   ),
                                 );
                               },
@@ -319,9 +320,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                       height: 24,
                                       width: 24,
                                       child: CircularProgressIndicator(
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white,
-                                        ),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
                                         strokeWidth: 2,
                                       ),
                                     )

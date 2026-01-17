@@ -1,4 +1,5 @@
 import 'package:bus_tracking_app/models/user.dart';
+import 'package:bus_tracking_app/core/services/auth_service.dart';
 
 class AuthController {
   static final AuthController _instance = AuthController._internal();
@@ -9,33 +10,22 @@ class AuthController {
 
   AuthController._internal();
 
+  final AuthService _authService = AuthService();
   User? _currentUser;
 
   User? get currentUser => _currentUser;
-  bool get isLoggedIn => _currentUser != null;
+  bool get isLoggedIn => _authService.isLoggedIn;
 
   /// Login with email and password
   Future<bool> login(String email, String password) async {
     try {
-      // TODO: Replace with actual API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Mock login - replace with actual authentication
-      if (email.isNotEmpty && password.length >= 6) {
-        _currentUser = User(
-          id: '1',
-          name: 'User Name',
-          email: email,
-          phoneNumber: '+94712345678',
-          userType: email.contains('admin') ? UserType.admin : UserType.passenger,
-          busCompanyName: email.contains('admin') ? 'SriLankan Buses Ltd' : null,
-          createdAt: DateTime.now(),
-        );
-        return true;
-      }
-      return false;
+      _currentUser = await _authService.signIn(
+        email: email,
+        password: password,
+      );
+      return true;
     } catch (e) {
-      throw Exception('Login failed: $e');
+      throw Exception(e.toString().replaceAll('Exception: ', ''));
     }
   }
 
@@ -54,43 +44,54 @@ class AuthController {
         throw Exception('Passwords do not match');
       }
 
-      // TODO: Replace with actual API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      _currentUser = User(
-        id: '1',
-        name: name,
+      _currentUser = await _authService.register(
         email: email,
+        password: password,
+        name: name,
         phoneNumber: phoneNumber,
         userType: userType,
         busCompanyName: busCompanyName,
-        createdAt: DateTime.now(),
       );
       return true;
     } catch (e) {
-      throw Exception('Registration failed: $e');
+      throw Exception(e.toString().replaceAll('Exception: ', ''));
     }
   }
 
   /// Logout
-  void logout() {
-    _currentUser = null;
+  Future<void> logout() async {
+    try {
+      await _authService.signOut();
+      _currentUser = null;
+    } catch (e) {
+      throw Exception('Logout failed: $e');
+    }
   }
 
   /// Reset password
   Future<bool> resetPassword(String email) async {
     try {
-      // TODO: Replace with actual API call
-      await Future.delayed(const Duration(seconds: 1));
+      await _authService.sendPasswordResetEmail(email);
       return true;
     } catch (e) {
-      throw Exception('Password reset failed: $e');
+      throw Exception(e.toString().replaceAll('Exception: ', ''));
+    }
+  }
+
+  /// Get current user data
+  Future<void> loadCurrentUser() async {
+    try {
+      _currentUser = await _authService.getCurrentUser();
+    } catch (e) {
+      throw Exception('Failed to load user data: $e');
     }
   }
 
   /// Validate email format
   static bool isValidEmail(String email) {
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
     return emailRegex.hasMatch(email);
   }
 
