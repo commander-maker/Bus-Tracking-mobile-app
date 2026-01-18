@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bus_tracking_app/features/auth/auth_controller.dart';
 import 'package:bus_tracking_app/models/route.dart' as app_route;
+import 'package:bus_tracking_app/features/passenger\'/bus_tracking_screen.dart';
 
 class RouteSelectionScreen extends StatefulWidget {
   const RouteSelectionScreen({super.key});
@@ -83,12 +84,8 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
   }
 
   void _selectRoute(app_route.Route route) {
-    // TODO: Navigate to bus tracking screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Selected Route: ${route.routeNumber}'),
-        duration: const Duration(seconds: 2),
-      ),
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => BusTrackingScreen(route: route)),
     );
   }
 

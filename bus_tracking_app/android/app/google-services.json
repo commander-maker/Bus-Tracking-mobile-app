@@ -1,10 +1,30 @@
 {
   "project_info": {
     "project_number": "481080557436",
+    "firebase_url": "https://bus-tracking-mobile-app-cfaa2-default-rtdb.firebaseio.com",
     "project_id": "bus-tracking-mobile-app-cfaa2",
     "storage_bucket": "bus-tracking-mobile-app-cfaa2.firebasestorage.app"
   },
   "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:481080557436:android:48a5b97af1efccaac76ef9",
+        "android_client_info": {
+          "package_name": "com.example.bus_tracking_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBGdDOBllf21dLmw_KbcHGyXYsy1-iWec"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
     {
       "client_info": {
         "mobilesdk_app_id": "1:481080557436:android:b21fedf865278678c76ef9",
