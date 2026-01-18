@@ -127,7 +127,7 @@ class _ManageBusesScreenState extends State<ManageBusesScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.orange.shade700,
+        backgroundColor: Colors.blue.shade700,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
