@@ -84,7 +84,10 @@ class _LoginScreenState extends State<LoginScreen> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Colors.blue.shade700, Colors.blue.shade400],
+              colors: [
+                const Color(0xFFD32F2F), // SLTB red
+                const Color(0xFFC62828), // Darker red
+              ],
             ),
           ),
           child: Column(
@@ -109,10 +112,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.directions_bus,
                         size: 60,
-                        color: Colors.blue.shade700,
+                        color: Color(0xFFD32F2F), // SLTB red
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -291,10 +294,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 );
                               },
-                              child: Text(
+                              child: const Text(
                                 'Forgot Password?',
                                 style: TextStyle(
-                                  color: Colors.blue.shade700,
+                                  color: Color(0xFF1565C0), // Blue accent
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -309,7 +312,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : _handleLogin,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue.shade700,
+                                backgroundColor: const Color(
+                                  0xFFD32F2F,
+                                ), // SLTB red
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -359,10 +364,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     );
                                   },
-                                  child: Text(
+                                  child: const Text(
                                     'Sign Up',
                                     style: TextStyle(
-                                      color: Colors.blue.shade700,
+                                      color: Color(0xFFD32F2F), // SLTB red
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                     ),

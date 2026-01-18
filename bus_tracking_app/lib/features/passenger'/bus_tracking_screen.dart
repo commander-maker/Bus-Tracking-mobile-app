@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:bus_tracking_app/models/bus.dart';
 import 'package:bus_tracking_app/models/route.dart' as app_route;
+import 'package:geolocator/geolocator.dart';
 import 'dart:async';
+import 'dart:ui' as ui;
 
 class BusTrackingScreen extends StatefulWidget {
   final app_route.Route route;
@@ -18,6 +20,9 @@ class _BusTrackingScreenState extends State<BusTrackingScreen> {
   Set<Marker> _markers = {};
   Bus? _selectedBus;
   Timer? _updateTimer;
+  Position? _currentPosition;
+  BitmapDescriptor? _busIcon;
+  BitmapDescriptor? _selectedBusIcon;
 
   // Mock data for buses on this route
   late List<Bus> _buses;
@@ -26,11 +31,124 @@ class _BusTrackingScreenState extends State<BusTrackingScreen> {
   void initState() {
     super.initState();
     _initializeMockBuses();
+    _loadCustomMarkers();
+    _getCurrentLocation();
     _updateMarkers();
     // Simulate real-time updates every 5 seconds
     _updateTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       _simulateBusMovement();
     });
+  }
+
+  Future<void> _loadCustomMarkers() async {
+    _busIcon = await _createBusIcon(Colors.red);
+    _selectedBusIcon = await _createBusIcon(Colors.green);
+    setState(() {
+      _updateMarkers();
+    });
+  }
+
+  Future<BitmapDescriptor> _createBusIcon(Color color) async {
+    final pictureRecorder = ui.PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
+    final paint = Paint()..color = color;
+
+    // Draw bus shape
+    const size = 100.0;
+
+    // Bus body
+    final rect = RRect.fromRectAndRadius(
+      const Rect.fromLTWH(10, 30, 80, 50),
+      const Radius.circular(8),
+    );
+    canvas.drawRRect(rect, paint);
+
+    // Bus windows
+    final windowPaint = Paint()..color = Colors.white.withOpacity(0.9);
+    canvas.drawRect(const Rect.fromLTWH(15, 35, 30, 15), windowPaint);
+    canvas.drawRect(const Rect.fromLTWH(55, 35, 30, 15), windowPaint);
+
+    // Bus wheels
+    final wheelPaint = Paint()..color = Colors.black;
+    canvas.drawCircle(const Offset(25, 80), 8, wheelPaint);
+    canvas.drawCircle(const Offset(75, 80), 8, wheelPaint);
+
+    // Direction indicator (front)
+    final frontPaint = Paint()..color = Colors.yellow;
+    canvas.drawRect(const Rect.fromLTWH(85, 45, 5, 20), frontPaint);
+
+    final picture = pictureRecorder.endRecording();
+    final image = await picture.toImage(size.toInt(), size.toInt());
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final bytes = byteData!.buffer.asUint8List();
+
+    return BitmapDescriptor.fromBytes(bytes);
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      // Check permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Location permission denied')),
+            );
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Location permissions are permanently denied'),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Get current location
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        _currentPosition = position;
+      });
+
+      // Center map on user location
+      if (_mapController != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newLatLngZoom(
+            LatLng(position.latitude, position.longitude),
+            14,
+          ),
+        );
+      }
+
+      // Listen to location updates
+      Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 10,
+        ),
+      ).listen((Position position) {
+        setState(() {
+          _currentPosition = position;
+        });
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error getting location: $e')));
+      }
+    }
   }
 
   void _initializeMockBuses() {
@@ -92,8 +210,7 @@ class _BusTrackingScreenState extends State<BusTrackingScreen> {
             companyName: bus.companyName,
             currentRouteId: bus.currentRouteId,
             currentLocation: LatLng(newLat, newLng),
-            speed:
-                bus.speed! + (5 - (bus.hashCode % 10)), // Vary speed slightly
+            speed: bus.speed! + (5 - (bus.hashCode % 10)), // Vary speed
             isActive: bus.isActive,
             lastUpdated: DateTime.now(),
           );
@@ -109,15 +226,19 @@ class _BusTrackingScreenState extends State<BusTrackingScreen> {
       return Marker(
         markerId: MarkerId(bus.id),
         position: bus.currentLocation ?? const LatLng(0, 0),
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          _selectedBus?.id == bus.id
-              ? BitmapDescriptor.hueGreen
-              : BitmapDescriptor.hueRed,
-        ),
+        icon:
+            (_selectedBus?.id == bus.id ? _selectedBusIcon : _busIcon) ??
+            BitmapDescriptor.defaultMarkerWithHue(
+              _selectedBus?.id == bus.id
+                  ? BitmapDescriptor.hueGreen
+                  : BitmapDescriptor.hueRed,
+            ),
         infoWindow: InfoWindow(
           title: bus.registrationNumber,
           snippet: '${bus.speed?.toStringAsFixed(1)} km/h',
         ),
+        rotation: _calculateBusRotation(bus),
+        anchor: const Offset(0.5, 0.5),
         onTap: () {
           setState(() {
             _selectedBus = bus;
@@ -125,6 +246,12 @@ class _BusTrackingScreenState extends State<BusTrackingScreen> {
         },
       );
     }).toSet();
+  }
+
+  double _calculateBusRotation(Bus bus) {
+    // Calculate rotation based on movement direction
+    // For now, return a simple rotation based on bus ID
+    return (bus.hashCode % 4) * 90.0;
   }
 
   void _centerOnBus(Bus bus) {
@@ -150,7 +277,7 @@ class _BusTrackingScreenState extends State<BusTrackingScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: const Color(0xFFD32F2F), // SLTB red
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
@@ -193,9 +320,9 @@ class _BusTrackingScreenState extends State<BusTrackingScreen> {
           // Route Info Card
           Container(
             width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.blue.shade700,
-              borderRadius: const BorderRadius.only(
+            decoration: const BoxDecoration(
+              color: Color(0xFFD32F2F), // SLTB red
+              borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(20),
                 bottomRight: Radius.circular(20),
               ),
@@ -245,18 +372,24 @@ class _BusTrackingScreenState extends State<BusTrackingScreen> {
               children: [
                 GoogleMap(
                   initialCameraPosition: CameraPosition(
-                    target:
-                        _buses.isNotEmpty &&
-                            _buses.first.currentLocation != null
-                        ? _buses.first.currentLocation!
-                        : const LatLng(6.9271, 79.8612), // Default to Colombo
-                    zoom: 13,
+                    target: _currentPosition != null
+                        ? LatLng(
+                            _currentPosition!.latitude,
+                            _currentPosition!.longitude,
+                          )
+                        : (_buses.isNotEmpty &&
+                                  _buses.first.currentLocation != null
+                              ? _buses.first.currentLocation!
+                              : const LatLng(6.9271, 79.8612)),
+                    zoom: 14,
                   ),
                   markers: _markers,
                   myLocationEnabled: true,
                   myLocationButtonEnabled: true,
                   zoomControlsEnabled: false,
                   mapType: MapType.normal,
+                  compassEnabled: true,
+                  trafficEnabled: false,
                   onMapCreated: (controller) {
                     _mapController = controller;
                   },
@@ -339,13 +472,13 @@ class _BusTrackingScreenState extends State<BusTrackingScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
+                          color: const Color(0xFFE3F2FD), // Light blue
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Live',
                           style: TextStyle(
-                            color: Colors.blue.shade700,
+                            color: Color(0xFF1565C0), // Blue accent
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),
@@ -414,10 +547,10 @@ class _BusTrackingScreenState extends State<BusTrackingScreen> {
         margin: const EdgeInsets.only(right: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.shade50 : Colors.grey.shade50,
+          color: isSelected ? const Color(0xFFFFEBEE) : Colors.grey.shade50, // Light red when selected
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? Colors.blue.shade700 : Colors.grey.shade200,
+            color: isSelected ? const Color(0xFF1565C0) : Colors.grey.shade200, // Blue accent border
             width: 2,
           ),
         ),
@@ -430,7 +563,7 @@ class _BusTrackingScreenState extends State<BusTrackingScreen> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Colors.blue.shade700
+                        ? const Color(0xFF1565C0) // Blue accent
                         : Colors.grey.shade300,
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -451,7 +584,7 @@ class _BusTrackingScreenState extends State<BusTrackingScreen> {
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: isSelected
-                              ? Colors.blue.shade700
+                              ? const Color(0xFF1565C0) // Blue accent
                               : Colors.black,
                         ),
                       ),

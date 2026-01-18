@@ -96,7 +96,7 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: const Color(0xFFD32F2F), // SLTB red
         title: const Text(
           'Select Bus Route',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
@@ -114,9 +114,9 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
           // User Info Header
           Container(
             width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.blue.shade700,
-              borderRadius: const BorderRadius.only(
+            decoration: const BoxDecoration(
+              color: Color(0xFFD32F2F), // SLTB red
+              borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(30),
                 bottomRight: Radius.circular(30),
               ),
@@ -130,10 +130,10 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
                     CircleAvatar(
                       radius: 30,
                       backgroundColor: Colors.white,
-                      child: Icon(
+                      child: const Icon(
                         Icons.person,
                         size: 35,
-                        color: Colors.blue.shade700,
+                        color: Color(0xFFD32F2F), // SLTB red
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -256,7 +256,7 @@ class _RouteSelectionScreenState extends State<RouteSelectionScreen> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade700,
+                      color: const Color(0xFFD32F2F), // SLTB red
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(

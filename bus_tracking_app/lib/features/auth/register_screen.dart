@@ -86,7 +86,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: const Color(0xFFD32F2F), // SLTB red
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -101,8 +101,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Colors.blue.shade700,
-                Colors.blue.shade400,
+                const Color(0xFFD32F2F), // SLTB red
+                const Color(0xFFC62828), // Darker red
               ],
             ),
           ),
@@ -139,10 +139,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 8),
                       const Text(
                         'Create your account to get started',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                       const SizedBox(height: 20),
                       // Error Message
@@ -156,8 +153,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.error_outline,
-                                  color: Colors.red.shade700, size: 20),
+                              Icon(
+                                Icons.error_outline,
+                                color: Colors.red.shade700,
+                                size: 20,
+                              ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
@@ -194,13 +194,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: _selectedUserType == UserType.passenger
-                                      ? Colors.blue.shade50
+                                      ? const Color(0xFFFFEBEE) // Light red
                                       : Colors.grey.shade100,
                                   border: Border.all(
                                     color:
                                         _selectedUserType == UserType.passenger
-                                            ? Colors.blue.shade700
-                                            : Colors.grey.shade300,
+                                        ? const Color(0xFF1565C0) // Blue accent
+                                        : Colors.grey.shade300,
                                     width: 2,
                                   ),
                                   borderRadius: BorderRadius.circular(10),
@@ -209,9 +209,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   children: [
                                     Icon(
                                       Icons.person,
-                                      color: _selectedUserType ==
+                                      color:
+                                          _selectedUserType ==
                                               UserType.passenger
-                                          ? Colors.blue.shade700
+                                          ? const Color(
+                                              0xFF1565C0,
+                                            ) // Blue accent
                                           : Colors.grey,
                                       size: 28,
                                     ),
@@ -222,9 +225,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         fontWeight: FontWeight.bold,
                                         color:
                                             _selectedUserType ==
-                                                    UserType.passenger
-                                                ? Colors.blue.shade700
-                                                : Colors.grey,
+                                                UserType.passenger
+                                            ? const Color(
+                                                0xFF1565C0,
+                                              ) // Blue accent
+                                            : Colors.grey,
                                       ),
                                     ),
                                   ],
@@ -244,11 +249,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: _selectedUserType == UserType.admin
-                                      ? Colors.blue.shade50
+                                      ? const Color(0xFFFFEBEE) // Light red
                                       : Colors.grey.shade100,
                                   border: Border.all(
                                     color: _selectedUserType == UserType.admin
-                                        ? Colors.blue.shade700
+                                        ? const Color(0xFF1565C0) // Blue accent
                                         : Colors.grey.shade300,
                                     width: 2,
                                   ),
@@ -258,10 +263,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   children: [
                                     Icon(
                                       Icons.admin_panel_settings,
-                                      color:
-                                          _selectedUserType == UserType.admin
-                                              ? Colors.blue.shade700
-                                              : Colors.grey,
+                                      color: _selectedUserType == UserType.admin
+                                          ? const Color(
+                                              0xFF1565C0,
+                                            ) // Blue accent
+                                          : Colors.grey,
                                       size: 28,
                                     ),
                                     const SizedBox(height: 4),
@@ -271,8 +277,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         fontWeight: FontWeight.bold,
                                         color:
                                             _selectedUserType == UserType.admin
-                                                ? Colors.blue.shade700
-                                                : Colors.grey,
+                                            ? const Color(
+                                                0xFF1565C0,
+                                              ) // Blue accent
+                                            : Colors.grey,
                                       ),
                                     ),
                                   ],
@@ -444,7 +452,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _handleRegister,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue.shade700,
+                            backgroundColor: const Color(
+                              0xFFD32F2F,
+                            ), // SLTB red
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
