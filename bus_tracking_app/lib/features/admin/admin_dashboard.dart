@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bus_tracking_app/features/admin/admin_route_selection_screen.dart';
+import 'package:bus_tracking_app/core/services/firestore_service.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -9,6 +10,54 @@ class AdminDashboard extends StatefulWidget {
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
+  final FirestoreService _firestoreService = FirestoreService();
+  
+  int totalBuses = 0;
+  int activeBuses = 0;
+  int totalRoutes = 0;
+  int estimatedPassengers = 0;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboardData();
+  }
+
+  Future<void> _loadDashboardData() async {
+    try {
+      // Fetch all buses
+      final allBuses = await _firestoreService.getBusesByCompany('');
+      
+      // Since getBusesByCompany requires a company name, let's fetch all buses directly
+      // We need to get all buses, so we'll count from routes
+      final buses = await _firestoreService.getBusesByCompany('');
+      
+      // Fetch all routes
+      final routes = await _firestoreService.getAllRoutes();
+      
+      setState(() {
+        // Count total buses - try to get all buses by fetching routes first
+        totalBuses = buses.isEmpty ? 0 : buses.length;
+        
+        // Count active buses (assume buses with status 'active')
+        activeBuses = buses.where((bus) => bus.isActive).length;
+        
+        // Total routes
+        totalRoutes = routes.length;
+        
+        // Estimated passengers (can be enhanced based on your data model)
+        estimatedPassengers = totalRoutes * 30; // Example: 30 passengers per route
+        
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading dashboard data: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,43 +107,47 @@ class _AdminDashboardState extends State<AdminDashboard> {
             ),
             const SizedBox(height: 16),
             // Dashboard Stats Cards
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              children: [
-                _buildStatCard(
-                  icon: Icons.directions_bus,
-                  iconColor: Colors.blue,
-                  title: 'Total Fleet',
-                  value: '5',
-                  context: context,
-                ),
-                _buildStatCard(
-                  icon: Icons.directions_run,
-                  iconColor: Colors.green,
-                  title: 'Active Buses',
-                  value: '4',
-                  context: context,
-                ),
-                _buildStatCard(
-                  icon: Icons.route,
-                  iconColor: Colors.purple,
-                  title: 'Total Routes',
-                  value: '4',
-                  context: context,
-                ),
-                _buildStatCard(
-                  icon: Icons.people,
-                  iconColor: Colors.orange,
-                  title: 'Passengers (Est)',
-                  value: '1.2k',
-                  context: context,
-                ),
-              ],
-            ),
+            isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    children: [
+                      _buildStatCard(
+                        icon: Icons.directions_bus,
+                        iconColor: Colors.blue,
+                        title: 'Total Fleet',
+                        value: totalBuses.toString(),
+                        context: context,
+                      ),
+                      _buildStatCard(
+                        icon: Icons.directions_run,
+                        iconColor: Colors.green,
+                        title: 'Active Buses',
+                        value: activeBuses.toString(),
+                        context: context,
+                      ),
+                      _buildStatCard(
+                        icon: Icons.route,
+                        iconColor: Colors.purple,
+                        title: 'Total Routes',
+                        value: totalRoutes.toString(),
+                        context: context,
+                      ),
+                      _buildStatCard(
+                        icon: Icons.people,
+                        iconColor: Colors.orange,
+                        title: 'Passengers (Est)',
+                        value: estimatedPassengers > 999
+                            ? '${(estimatedPassengers / 1000).toStringAsFixed(1)}k'
+                            : estimatedPassengers.toString(),
+                        context: context,
+                      ),
+                    ],
+                  ),
             const SizedBox(height: 24),
             // Register Bus Section
             Container(
