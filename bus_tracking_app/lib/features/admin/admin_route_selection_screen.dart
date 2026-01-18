@@ -179,7 +179,7 @@ class _AdminRouteSelectionScreenState extends State<AdminRouteSelectionScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.orange.shade700,
+        backgroundColor: Colors.blue.shade700,
         title: const Text(
           'Manage Routes',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
@@ -203,7 +203,7 @@ class _AdminRouteSelectionScreenState extends State<AdminRouteSelectionScreen> {
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.orange.shade700,
+              color: Colors.blue.shade700,
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(30),
                 bottomRight: Radius.circular(30),
@@ -221,7 +221,7 @@ class _AdminRouteSelectionScreenState extends State<AdminRouteSelectionScreen> {
                       child: Icon(
                         Icons.admin_panel_settings,
                         size: 35,
-                        color: Colors.orange.shade700,
+                        color: Colors.blue.shade700,
                       ),
                     ),
                     const SizedBox(width: 16),
