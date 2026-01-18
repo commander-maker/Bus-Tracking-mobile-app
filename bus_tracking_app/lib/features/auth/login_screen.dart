@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
             if (user?.userType == UserType.admin) {
               Navigator.of(
                 context,
-              ).pushReplacementNamed('/admin-route-selection');
+              ).pushReplacementNamed('/admin-dashboard');
             } else {
               Navigator.of(context).pushReplacementNamed('/route-selection');
             }
