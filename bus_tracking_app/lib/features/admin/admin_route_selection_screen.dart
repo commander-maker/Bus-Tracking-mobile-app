@@ -367,7 +367,7 @@ class _AdminRouteSelectionScreenState extends State<AdminRouteSelectionScreen> {
                     ),
                     decoration: BoxDecoration(
                       color: route.isActive
-                          ? Colors.orange.shade700
+                          ? Colors.blue.shade700
                           : Colors.grey.shade400,
                       borderRadius: BorderRadius.circular(12),
                     ),
