@@ -61,148 +61,336 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FB),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: Colors.transparent,
         title: const Text(
-          'Dashboard Overview',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          'Admin Dashboard',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            fontSize: 24,
+          ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
-            onPressed: () {
-              Navigator.pushNamed(context, '/admin-route-selection');
-            },
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withOpacity(0.2),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.settings, color: Colors.white),
+              onPressed: () {
+                Navigator.pushNamed(context, '/admin-route-selection');
+              },
+            ),
           ),
         ],
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF1e88e5),
+                Color(0xFF1565c0),
+              ],
+            ),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.blue.shade600, Colors.blue.shade800],
+        physics: const BouncingScrollPhysics(),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Welcome Header
+              Text(
+                'Welcome Back!',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Stats Grid
+              isLoading
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Color(0xFF1e88e5),
+                          ),
+                        ),
+                      ),
+                    )
+                  : GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 0.95,
+                      children: [
+                        _buildModernStatCard(
+                          icon: Icons.directions_bus,
+                          iconColor: Color(0xFF1e88e5),
+                          bgColor: Color(0xFF1e88e5).withOpacity(0.1),
+                          title: 'Total Fleet',
+                          value: totalBuses.toString(),
+                          context: context,
+                        ),
+                        _buildModernStatCard(
+                          icon: Icons.check_circle,
+                          iconColor: Color(0xFF43a047),
+                          bgColor: Color(0xFF43a047).withOpacity(0.1),
+                          title: 'Active Buses',
+                          value: activeBuses.toString(),
+                          context: context,
+                        ),
+                        _buildModernStatCard(
+                          icon: Icons.route,
+                          iconColor: Color(0xFF7e57c2),
+                          bgColor: Color(0xFF7e57c2).withOpacity(0.1),
+                          title: 'Total Routes',
+                          value: totalRoutes.toString(),
+                          context: context,
+                        ),
+                        _buildModernStatCard(
+                          icon: Icons.people_alt,
+                          iconColor: Color(0xFFffa726),
+                          bgColor: Color(0xFFffa726).withOpacity(0.1),
+                          title: 'Passengers',
+                          value: estimatedPassengers > 999
+                              ? '${(estimatedPassengers / 1000).toStringAsFixed(1)}k'
+                              : estimatedPassengers.toString(),
+                          context: context,
+                        ),
+                      ],
+                    ),
+
+              const SizedBox(height: 32),
+
+              // Action Cards Section
+              Text(
+                'Quick Actions',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Register Bus Card
+              _buildActionCard(
+                icon: Icons.add_circle_outline,
+                iconColor: Color(0xFF1e88e5),
+                title: 'Register New Bus',
+                subtitle: 'Add new buses to the fleet',
+                bgGradient: LinearGradient(
+                  colors: [
+                    Color(0xFF1e88e5).withOpacity(0.1),
+                    Color(0xFF1565c0).withOpacity(0.05),
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  Navigator.pushNamed(context, '/manage-buses');
+                },
               ),
-              child: Row(
-                children: [
-                  Icon(Icons.dashboard, color: Colors.white, size: 24),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Dashboard Overview',
-                      style: TextStyle(
+
+              const SizedBox(height: 12),
+
+              // Manage Routes Card
+              _buildActionCard(
+                icon: Icons.edit_location_alt,
+                iconColor: Color(0xFF7e57c2),
+                title: 'Manage Routes',
+                subtitle: 'Create, edit, or delete routes',
+                bgGradient: LinearGradient(
+                  colors: [
+                    Color(0xFF7e57c2).withOpacity(0.1),
+                    Color(0xFF6a1b9a).withOpacity(0.05),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                onTap: () {
+                  Navigator.pushNamed(context, '/admin-route-selection');
+                },
+              ),
+
+              const SizedBox(height: 32),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernStatCard({
+    required IconData icon,
+    required Color iconColor,
+    required Color bgColor,
+    required String title,
+    required String value,
+    required BuildContext context,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: iconColor,
+              size: 28,
+            ),
+          ),
+          const Spacer(),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.3,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionCard({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required Gradient bgGradient,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: bgGradient,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Colors.grey.shade200,
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: iconColor.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Dashboard Stats Cards
-            isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : GridView.count(
-                    crossAxisCount: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    children: [
-                      _buildStatCard(
-                        icon: Icons.directions_bus,
-                        iconColor: Colors.blue,
-                        title: 'Total Fleet',
-                        value: totalBuses.toString(),
-                        context: context,
-                      ),
-                      _buildStatCard(
-                        icon: Icons.directions_run,
-                        iconColor: Colors.green,
-                        title: 'Active Buses',
-                        value: activeBuses.toString(),
-                        context: context,
-                      ),
-                      _buildStatCard(
-                        icon: Icons.route,
-                        iconColor: Colors.purple,
-                        title: 'Total Routes',
-                        value: totalRoutes.toString(),
-                        context: context,
-                      ),
-                      _buildStatCard(
-                        icon: Icons.people,
-                        iconColor: Colors.orange,
-                        title: 'Passengers (Est)',
-                        value: estimatedPassengers > 999
-                            ? '${(estimatedPassengers / 1000).toStringAsFixed(1)}k'
-                            : estimatedPassengers.toString(),
-                        context: context,
-                      ),
-                    ],
-                  ),
-            const SizedBox(height: 24),
-            // Register Bus Section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Register Bus',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Add new buses to the fleet and configure GPS trackers.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/manage-buses');
-                    },
-                    child: const Text(
-                      'Go to Registration →',
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
                       style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+              Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.grey.shade400,
+                size: 18,
+              ),
+            ],
+          ),
         ),
       ),
     );
